@@ -140,7 +140,7 @@ def decompileSC(fileName):
             usedPixels = []
             for y in range(height):
                 for x in range(width):
-                    # print(f"x{x} y{y}")
+                    print(f"x{x} y{y}")
                     if pixels[x + y * width][3] != 0 and (x, y) not in usedPixels:
                         Current = 0
                         slicedPixels = [(x, y, pixels[x + y * width])]
@@ -150,7 +150,7 @@ def decompileSC(fileName):
                             if len(slicedPixels) == Current:
                                 break
                             currentPixel = slicedPixels[Current]
-                            # print(f"current {currentPixel}")
+                            print(f"current {currentPixel}")
                             # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "t"))
                             # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tr"))
                             # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "r"))
@@ -160,43 +160,84 @@ def decompileSC(fileName):
                             # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "l"))
                             # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tl"))
                             # print("")
+                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "t"):
+                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, -1)
+                            #     slicedPixels.append(sp)
+                            #     checkedPixels.append(cp)
+                            #     usedPixels.append(up)
+                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tr"):
+                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, -1)
+                            #     slicedPixels.append(sp)
+                            #     checkedPixels.append(cp)
+                            #     usedPixels.append(up)
+                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "r"):
+                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 0)
+                            #     slicedPixels.append(sp)
+                            #     checkedPixels.append(cp)
+                            #     usedPixels.append(up)
+                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "br"):
+                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 1)
+                            #     slicedPixels.append(sp)
+                            #     checkedPixels.append(cp)
+                            #     usedPixels.append(up)
+                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "b"):
+                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, 1)
+                            #     slicedPixels.append(sp)
+                            #     checkedPixels.append(cp)
+                            #     usedPixels.append(up)
+                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "bl"):
+                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 1)
+                            #     slicedPixels.append(sp)
+                            #     checkedPixels.append(cp)
+                            #     usedPixels.append(up)
+                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "l"):
+                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 0)
+                            #     slicedPixels.append(sp)
+                            #     checkedPixels.append(cp)
+                            #     usedPixels.append(up)
+                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tl"):
+                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, -1)
+                            #     slicedPixels.append(sp)
+                            #     checkedPixels.append(cp)
+                            #     usedPixels.append(up)
+
                             if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "t"):
                                 sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, -1)
                                 slicedPixels.append(sp)
                                 checkedPixels.append(cp)
                                 usedPixels.append(up)
-                            if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tr"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, -1)
+                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tl"):
+                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, -1)
                                 slicedPixels.append(sp)
                                 checkedPixels.append(cp)
                                 usedPixels.append(up)
-                            if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "r"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 0)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "br"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "b"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, 1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "bl"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "l"):
+                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "l"):
                                 sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 0)
                                 slicedPixels.append(sp)
                                 checkedPixels.append(cp)
                                 usedPixels.append(up)
-                            if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tl"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, -1)
+                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "bl"):
+                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 1)
+                                slicedPixels.append(sp)
+                                checkedPixels.append(cp)
+                                usedPixels.append(up)
+                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "b"):
+                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, 1)
+                                slicedPixels.append(sp)
+                                checkedPixels.append(cp)
+                                usedPixels.append(up)
+                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "br"):
+                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 1)
+                                slicedPixels.append(sp)
+                                checkedPixels.append(cp)
+                                usedPixels.append(up)
+                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "r"):
+                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 0)
+                                slicedPixels.append(sp)
+                                checkedPixels.append(cp)
+                                usedPixels.append(up)
+                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tr"):
+                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, -1)
                                 slicedPixels.append(sp)
                                 checkedPixels.append(cp)
                                 usedPixels.append(up)

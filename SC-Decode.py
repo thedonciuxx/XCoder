@@ -8,7 +8,8 @@ import platform
 sys.path.append('./System')
 
 from DataBase import Version
-from PIL import Image
+from BytesWorker import *
+from PIL import Image, ImageDraw, ImageChops
 
 
 folder = "./In-Compressed-SC/"
@@ -107,10 +108,6 @@ def decompileSC(fileName):
 
             i += 10
 
-            d = open("debug", "w")
-            d.write(decompressed.hex())
-            d.close()
-
             if subType == 0:
                 pixelSize = 4
             elif subType == 2 or subType == 4 or subType == 6:
@@ -118,7 +115,7 @@ def decompileSC(fileName):
             elif subType == 10:
                 pixelSize = 1
             else:
-                raise Exception("Unknown pixel type: " + subType)
+                raise Exception("Unknown pixel type: " + str(subType))
 
             xfilename = fileName[::-1]
             xfilename = xfilename[:xfilename.index('/')]
@@ -136,124 +133,111 @@ def decompileSC(fileName):
                     pixels.append(convert_pixel(decompressed[i:i + pixelSize], subType))
                     i += pixelSize
 
-            Asset = 0
-            usedPixels = []
+            img.putdata(pixels)
+
+            d = open("whatthef.txt", "w")
+
+            assetInt = 0
+
+            checkArray = [
+                ("t", 0, -1, 5),
+                ("tl", -1, -1, 6),
+                ("l", -1, 0, 7),
+                ("bl", -1, 1, 0),
+                ("b", 0, 1, 1),
+                ("br", 1, 1, 2),
+                ("r", 1, 0, 3),
+                ("tr", 1, -1, 4),
+                ]
+            checkArray.extend(checkArray)
+
             for y in range(height):
                 for x in range(width):
-                    print(f"x{x} y{y}")
-                    if pixels[x + y * width][3] != 0 and (x, y) not in usedPixels:
-                        Current = 0
-                        slicedPixels = [(x, y, pixels[x + y * width])]
-                        checkedPixels = []
-                        furthestPoints = [y, x, x, y]
-                        while True:
-                            if len(slicedPixels) == Current:
-                                break
-                            currentPixel = slicedPixels[Current]
-                            print(f"current {currentPixel}")
-                            # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "t"))
-                            # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tr"))
-                            # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "r"))
-                            # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "br"))
-                            # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "b"))
-                            # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "bl"))
-                            # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "l"))
-                            # print(pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tl"))
-                            # print("")
-                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "t"):
-                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, -1)
-                            #     slicedPixels.append(sp)
-                            #     checkedPixels.append(cp)
-                            #     usedPixels.append(up)
-                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tr"):
-                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, -1)
-                            #     slicedPixels.append(sp)
-                            #     checkedPixels.append(cp)
-                            #     usedPixels.append(up)
-                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "r"):
-                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 0)
-                            #     slicedPixels.append(sp)
-                            #     checkedPixels.append(cp)
-                            #     usedPixels.append(up)
-                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "br"):
-                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 1)
-                            #     slicedPixels.append(sp)
-                            #     checkedPixels.append(cp)
-                            #     usedPixels.append(up)
-                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "b"):
-                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, 1)
-                            #     slicedPixels.append(sp)
-                            #     checkedPixels.append(cp)
-                            #     usedPixels.append(up)
-                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "bl"):
-                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 1)
-                            #     slicedPixels.append(sp)
-                            #     checkedPixels.append(cp)
-                            #     usedPixels.append(up)
-                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "l"):
-                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 0)
-                            #     slicedPixels.append(sp)
-                            #     checkedPixels.append(cp)
-                            #     usedPixels.append(up)
-                            # if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tl"):
-                            #     sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, -1)
-                            #     slicedPixels.append(sp)
-                            #     checkedPixels.append(cp)
-                            #     usedPixels.append(up)
 
-                            if pixelChecker(pixels, currentPixel, checkedPixels, width, height, "t"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, -1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tl"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, -1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "l"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 0)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "bl"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, -1, 1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "b"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 0, 1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "br"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "r"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, 0)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            elif pixelChecker(pixels, currentPixel, checkedPixels, width, height, "tr"):
-                                sp, cp, up, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, 1, -1)
-                                slicedPixels.append(sp)
-                                checkedPixels.append(cp)
-                                usedPixels.append(up)
-                            Current += 1
-                        # print(slicedPixels)
+                    if pixels[x + y * width][3] != 0:
+                        current = 0
+                        slicedPixels = [(x, y)]
+                        furthestPoints = [y, x, x, y]
+                        lastPixelDirection = 0
+
+                        startingPixel = (x, y)
+
+                        while True:
+                            if len(slicedPixels) == current:
+                                break
+                            currentPixel = slicedPixels[current]
+
+                            print("r", currentPixel)
+
+                            for r in range(8):
+                                print("w", currentPixel)
+                                print(checkArray[lastPixelDirection + r][0])
+                                if pixelChecker(pixels, currentPixel, width, height, checkArray[lastPixelDirection + r][0], 1):
+                                    if (currentPixel[0] + checkArray[lastPixelDirection + r][1], currentPixel[1] + checkArray[lastPixelDirection + r][2]) == startingPixel:
+                                        break
+                                    sp, furthestPoints = pixelCalculator(pixels, currentPixel, furthestPoints, width, height, checkArray[lastPixelDirection + r][1], checkArray[lastPixelDirection + r][2])
+                                    slicedPixels.append(sp)
+                                    print("f", sp)
+                                    lastPixelDirection = checkArray[lastPixelDirection + r][3]
+                                    break
+
+                            current += 1
+
                         sWidth = furthestPoints[2] - furthestPoints[1] + 1
                         sHeight = furthestPoints[3] - furthestPoints[0] + 1
-                        imgData = [(0, 0, 0, 0) for x in range(sWidth * sHeight)]
+                        imgData = [0 for x in range(sWidth * sHeight)]
                         for pixel in slicedPixels:
-                            imgData[pixel[0] - furthestPoints[1] + (pixel[1] - furthestPoints[0]) * sWidth] = pixel[2]
-                        slicedImg = Image.new("RGBA", (sWidth, sHeight))
-                        slicedImg.putdata(imgData)
-                        slicedImg.save(folder_export + CurrentSubPath + str(Asset) + "part.png")
-                        Asset += 1
+                            imgData[pixel[0] - furthestPoints[1] + (pixel[1] - furthestPoints[0]) * sWidth] = 1
 
-            img.putdata(pixels)
+                        unmasked = Image.new("RGBA", (width, height))
+                        unmasked.putdata(pixels)
+                        unmasked = unmasked.crop((furthestPoints[1], furthestPoints[0], furthestPoints[2] + 1, furthestPoints[3] + 1))
+
+                        maskOutline = Image.new("1", (sWidth, sHeight))
+                        maskOutline.putdata(imgData)
+                        maskOutline.save(folder_export + CurrentSubPath + str(assetInt) + "part2.png")
+
+                        maskFill = Image.new("1", (sWidth, sHeight))
+                        maskFill.putdata(imgData)
+
+                        mask = Image.new("1", (sWidth, sHeight))
+
+                        for h in range(sHeight):
+                            for w in range(sWidth):
+                                if pixels[furthestPoints[1] + w + width * (furthestPoints[0] + h)][3] > 0 and maskOutline.load()[w, h] == 0:
+
+                                    ImageDraw.floodfill(maskFill, xy=(w, h), value=1)
+                                    maskFill = ImageChops.subtract(maskFill, maskOutline)
+                                    mask = maskFill.copy()
+
+                                    maskOutlineData = maskOutline.load()
+
+                                    for y1 in range(sHeight):
+                                        for x1 in range(sWidth):
+                                            if maskOutlineData[x1, y1] == 1:
+                                                print("q", (x1, y1))
+                                                if imageCheckerOR(mask, (x1, y1), checkArray, width, height):
+                                                    print("found", (x1, y1))
+
+                        filledImgData = mask.load()
+                        mask.save(folder_export + CurrentSubPath + str(assetInt) + "part4.png")
+
+                        slicedImg = Image.new("RGBA", (sWidth, sHeight))
+                        slicedImg = Image.composite(unmasked, slicedImg, mask)
+                        slicedImg.save(folder_export + CurrentSubPath + str(assetInt) + "part.png")
+
+                        for sy in range(sHeight):
+                            for sx in range(sWidth):
+                                if filledImgData[sx, sy] == 1:
+                                    pixels[furthestPoints[1] + sx + width * (furthestPoints[0] + sy)] = (0, 0, 0, 0)
+
+                        debug = Image.new("RGBA", (width, height))
+                        debug.putdata(pixels)
+                        debug.save(folder_export + CurrentSubPath + str(assetInt) + "part3.png")
+
+                        assetInt += 1
+
+                        exit()
 
             if fileType == 28 or fileType == 27:
                 imgl = img.load()
@@ -287,36 +271,55 @@ def decompileSC(fileName):
             picCount += 1
             _("Saving completed" + "\n")
 
+            d.close()
+
 
 def pixelCalculator(pixels, currentPixel, furthestPoints, width, height, xSide, ySide):
-    return(((currentPixel[0] + xSide, currentPixel[1] + ySide, pixels[currentPixel[0] + xSide + width * (currentPixel[1] + ySide)]),
-        (currentPixel[0] + xSide, currentPixel[1] + ySide),
-        (currentPixel[0] + xSide, currentPixel[1] + ySide),
-        [currentPixel[1] + ySide if currentPixel[1] + ySide < furthestPoints[0] and ySide < 0 else furthestPoints[0],
-        currentPixel[0] + xSide if currentPixel[0] + xSide < furthestPoints[1] and xSide < 0 else furthestPoints[1],
-        currentPixel[0] + xSide if currentPixel[0] + xSide > furthestPoints[2] and xSide > 0 else furthestPoints[2],
-        currentPixel[1] + ySide if currentPixel[1] + ySide > furthestPoints[3] and ySide > 0 else furthestPoints[3]]))
+    return(
+        (
+            (currentPixel[0] + xSide, currentPixel[1] + ySide),
+            [
+                currentPixel[1] + ySide if currentPixel[1] + ySide < furthestPoints[0] and ySide < 0 else furthestPoints[0],
+                currentPixel[0] + xSide if currentPixel[0] + xSide < furthestPoints[1] and xSide < 0 else furthestPoints[1],
+                currentPixel[0] + xSide if currentPixel[0] + xSide > furthestPoints[2] and xSide > 0 else furthestPoints[2],
+                currentPixel[1] + ySide if currentPixel[1] + ySide > furthestPoints[3] and ySide > 0 else furthestPoints[3]
+            ]
+        )
+        )
 
 
-def pixelChecker(pixels, currentPixel, checkedPixels, width, height, side):
-    if side == "t":
-        return(currentPixel[1] != 0 and pixels[currentPixel[0] + width * (currentPixel[1] - 1)][3] != 0 and (currentPixel[0], currentPixel[1] - 1) not in checkedPixels)
-    elif side == "tr":
-        return(currentPixel[1] != 0 and currentPixel[0] != width - 1 and pixels[currentPixel[0] + 1 + width * (currentPixel[1] - 1)][3] != 0 and (currentPixel[0] + 1, currentPixel[1] - 1) not in checkedPixels)
-    if side == "r":
-        return(currentPixel[0] != width - 1 and pixels[currentPixel[0] + 1 + width * currentPixel[1]][3] != 0 and (currentPixel[0] + 1, currentPixel[1]) not in checkedPixels)
-    elif side == "br":
-        return(currentPixel[1] != height - 1 and currentPixel[0] != width - 1 and pixels[currentPixel[0] + 1 + width * (currentPixel[1] + 1)][3] != 0 and (currentPixel[0] + 1, currentPixel[1] + 1) not in checkedPixels)
-    if side == "b":
-        return(currentPixel[1] != height - 1 and pixels[currentPixel[0] + width * (currentPixel[1] + 1)][3] != 0 and (currentPixel[0], currentPixel[1] + 1) not in checkedPixels)
-    elif side == "bl":
-        return(currentPixel[1] != height - 1 and currentPixel[0] != 0 and pixels[currentPixel[0] - 1 + width * (currentPixel[1] + 1)][3] != 0 and (currentPixel[0] - 1, currentPixel[1] + 1) not in checkedPixels)
-    if side == "l":
-        return(currentPixel[0] != 0 and pixels[currentPixel[0] - 1 + width * currentPixel[1]][3] != 0 and (currentPixel[0] - 1, currentPixel[1]) not in checkedPixels)
-    elif side == "tl":
-        return(currentPixel[1] != 0 and currentPixel[0] != 0 and pixels[currentPixel[0] - 1 + width * (currentPixel[1] - 1)][3] != 0 and (currentPixel[0] - 1, currentPixel[1] - 1) not in checkedPixels)
-    else:
-        return False
+def pixelChecker(i, c, w, h, s, d):
+    a = {
+        "t": (-1, 0, 0, -1),
+        "tr": (w-1, 0, 1, -1),
+        "r": (w-1, -1, 1, 0),
+        "br": (w-1, h-1, 1, 1),
+        "b": (-1, h-1, 0, 1),
+        "bl": (0, h-1, -1, 1),
+        "l": (0, -1, -1, 0),
+        "tl": (0, 0, -1, -1)
+    }
+    b = a[s]
+    print("v", c)
+    # print(f"{c[0]} != {b[0]}")
+    # print(c[0] != b[0])
+    # print(f"{c[1]} != {b[1]}")
+    # print(c[1] != b[1])
+    if d == 1:
+        return c[0] != b[0] and c[1] != b[1] and i[c[0] + b[2] + w * (c[1] + b[3])][0] == 1
+    elif d == 2:
+        print("d == 2: ", i[c[0] + b[2], c[1] + b[3]])
+        return c[0] != b[0] and c[1] != b[1] and i[c[0] + b[2], c[1] + b[3]][0] == 1
+    return False
+
+
+def imageCheckerOR(image, currentPixel, checkArray, width, height):
+    print("t", currentPixel)
+    final = False
+    for i in range(8):
+        if pixelChecker(image.load(), currentPixel, width, height, checkArray[i][0], 2):
+            final = True
+    return final
 
 
 files = os.listdir(folder)

@@ -188,38 +188,31 @@ def decompileSC(fileName):
 
                         maskOutline = Image.new("1", (sWidth, sHeight))
                         maskOutline.putdata(imgData)
-                        maskOutline.save(folder_export + CurrentSubPath + str(assetInt) + "part2.png")
 
                         maskFill = Image.new("1", (sWidth, sHeight))
 
                         savedFills = Image.new("1", (sWidth, sHeight))
-                        savedFills.save(folder_export + CurrentSubPath + str(assetInt) + "part10.png")
-
                         mask = Image.new("1", (sWidth, sHeight))
 
                         masked = False
 
+                        brokenInt = 0
+
                         for h in range(sHeight):
                             for w in range(sWidth):
-                                if pixels[furthestPoints[1] + w + width * (furthestPoints[0] + h)][3] > 0 and maskOutline.load()[w, h] == 0 and savedFills.load()[w, h] == 0:
-
-                                    maskOutline.save(folder_export + CurrentSubPath + str(assetInt) + "part8.png")
-                                    savedFills.save(folder_export + CurrentSubPath + str(assetInt) + "part9.png")
+                                if pixels[furthestPoints[1] + w + width * (furthestPoints[0] + h)][3] > 0 and maskOutline.load()[w, h] == 0 and savedFills.load()[w, h] == 0 and imageCheckerOR(maskOutline, (w, h), checkArray, sWidth, sHeight):
 
                                     maskFillData = []
                                     for y1 in range(sHeight):
                                         for x1 in range(sWidth):
-                                            maskFillData.append(1 if maskOutline.load()[x1, y1] == 1 or savedFills.load()[x1, y1] == 1 else 0)
+                                            maskFillData.append(1 if maskOutline.load()[x1, y1] == 1 or savedFills.load()[x1, y1] > 0 else 0)
 
                                     maskFill.putdata(maskFillData)
 
                                     ImageDraw.floodfill(maskFill, xy=(w, h), value=1)
 
                                     savedFills = ImageChops.add(maskFill, savedFills)
-                                    maskFill.save(folder_export + CurrentSubPath + str(assetInt) + "part6.png")
-                                    maskOutline.save(folder_export + CurrentSubPath + str(assetInt) + "part7.png")
                                     maskFill = ImageChops.subtract(maskFill, maskOutline)
-                                    maskFill.save(folder_export + CurrentSubPath + str(assetInt) + "part5.png")
                                     mask = maskFill.copy()
 
                                     maskOutlineData = maskOutline.load()
@@ -227,13 +220,16 @@ def decompileSC(fileName):
                                     outlineCountTotal = 0
                                     outlineCount = 0
                                     outlineCountPrevious = -1
+                                    maxAttempts = 5
+                                    attempt = 0
 
                                     for y1 in range(sHeight):
                                         for x1 in range(sWidth):
                                             if maskOutlineData[x1, y1] == 1:
                                                 outlineCountTotal += 1
 
-                                    while outlineCount != outlineCountTotal and outlineCount != outlineCountPrevious:
+                                    while outlineCount != outlineCountTotal and outlineCount != outlineCountPrevious and attempt != maxAttempts:
+                                        attempt += 1
                                         outlineCountPrevious = outlineCount
                                         for y2 in range(sHeight):
                                             for x2 in range(sWidth):
@@ -241,7 +237,7 @@ def decompileSC(fileName):
                                                     if imageCheckerOR(mask, (x2, y2), checkArray, sWidth, sHeight) and maskOutlineData[x2, y2] == 1 and mask.load()[x2, y2] == 0:
                                                         mask.putpixel((x2, y2), 1)
                                                         outlineCount += 1
-                                    if outlineCount != outlineCountPrevious:
+                                    if outlineCount == outlineCountTotal:
                                         masked = True
                                 if masked:
                                     break
@@ -249,7 +245,6 @@ def decompileSC(fileName):
                                 break
 
                         filledImgData = mask.load()
-                        mask.save(folder_export + CurrentSubPath + str(assetInt) + "part4.png")
 
                         slicedImg = Image.new("RGBA", (sWidth, sHeight))
                         slicedImg = Image.composite(unmasked, slicedImg, mask)
@@ -259,10 +254,6 @@ def decompileSC(fileName):
                             for sx in range(sWidth):
                                 if filledImgData[sx, sy] == 1:
                                     pixels[furthestPoints[1] + sx + width * (furthestPoints[0] + sy)] = (0, 0, 0, 0)
-
-                        debug = Image.new("RGBA", (width, height))
-                        debug.putdata(pixels)
-                        debug.save(folder_export + CurrentSubPath + str(assetInt) + "part3.png")
 
                         assetInt += 1
 
@@ -326,7 +317,7 @@ def pixelChecker(i, c, w, h, s, d):
     }
     b = a[s]
     if d == 1:
-        return c[0] != b[0] and c[1] != b[1] and i[c[0] + b[2] + w * (c[1] + b[3])][0] != 0
+        return c[0] != b[0] and c[1] != b[1] and i[c[0] + b[2] + w * (c[1] + b[3])][3] != 0
     elif d == 2:
         return c[0] != b[0] and c[1] != b[1] and i[c[0] + b[2], c[1] + b[3]] != 0
     return False
